@@ -1,0 +1,44 @@
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terrain-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: terrain-app
+  template:
+    metadata:
+      labels:
+        app: terrain-app
+    spec:
+      containers:
+        - name: web
+          image: terrain-booking-image:latest
+          ports:
+            - containerPort: 8080
+            - containerPort: 22
+          envFrom:
+            - configMapRef:
+                name: web-config
+          volumeMounts:
+            - name: app-storage
+              mountPath: /var/www/html
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_DATABASE
+              value: "yourname_db"
+            - name: MYSQL_ROOT_PASSWORD
+              value: "Hello@123"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: app-storage
+          emptyDir: {}
+        - name: mysql-storage
+          emptyDir: {}
